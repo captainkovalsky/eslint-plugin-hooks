@@ -24,7 +24,7 @@ module.exports = {
       url: 'https://github.com/hiukky/eslint-plugin-hooks/blob/main/docs/rules/sort.md',
       recommended: false,
     },
-    fixable: undefined,
+    fixable: true,
     schema: [
       {
         type: 'object',
@@ -90,8 +90,8 @@ module.exports = {
                   (type === 'CallExpression'
                     ? [type, callee]
                     : type === 'VariableDeclarator'
-                    ? [type, init]
-                    : []) as [Node['type'], Node],
+                      ? [type, init]
+                      : []) as [Node['type'], Node],
               )
               .filter(node => node.length === 2)
               .map(([type, declaration]) => {
@@ -124,13 +124,23 @@ module.exports = {
               const noMatching = (): boolean =>
                 correctOrdering.length > 1 &&
                 correctOrdering[idx].name !== hook.name
+              const correctHook = correctOrdering[idx]
+
 
               if (noMatching()) {
                 ctx.report(
                   hook,
-                  `Non-matching declaration order. ${hook.name} comes ${
-                    !idx ? 'after' : 'before'
+                  `Non-matching declaration order. ${hook.name} comes ${!idx ? 'after' : 'before'
                   } ${correctOrdering[idx].name}.`,
+                  (fixer) => {
+                    const sourceCode = ctx.getSourceCode();
+                    const currentText = sourceCode.getText(hook);
+                    const correctText = sourceCode.getText(correctHook);
+                    return [
+                      fixer.replaceTextRange(hook.range, correctText),
+                      fixer.replaceTextRange(correctHook.range, currentText),
+                    ];
+                  },
                 )
               }
             })
