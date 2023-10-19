@@ -24,7 +24,7 @@ module.exports = {
       url: 'https://github.com/hiukky/eslint-plugin-hooks/blob/main/docs/rules/sort.md',
       recommended: false,
     },
-    fixable: undefined,
+    fixable: true,
     schema: [
       {
         type: 'object',
